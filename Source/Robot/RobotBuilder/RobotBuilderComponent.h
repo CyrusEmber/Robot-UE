@@ -91,6 +91,9 @@ public:
 	/** Sets the drive mapping context used while in drive mode */
 	void SetDriveMappingContext(UInputMappingContext* Context) { DriveMappingContext = Context; }
 
+	/** Sets the part definitions offered by the build UI */
+	void SetPartDefinitions(const TArray<TObjectPtr<URobotPartDefinition>>& Definitions) { PartDefinitions = Definitions; }
+
 protected:
 	/** Traces from the player camera. Returns true on blocking hit. */
 	bool TraceFromCamera(FHitResult& OutHit) const;

@@ -2,6 +2,7 @@
 
 #include "RobotBuilderPlayerController.h"
 #include "RobotBuilderComponent.h"
+#include "RobotPartDefinition.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
@@ -33,6 +34,38 @@ ARobotBuilderPlayerController::ARobotBuilderPlayerController()
 		if (DriveContextFinder.Succeeded())
 		{
 			BuilderComponent->SetDriveMappingContext(DriveContextFinder.Object);
+		}
+
+		// auto-wire the default part definitions created by the setup script
+		TArray<TObjectPtr<URobotPartDefinition>> DefaultParts;
+
+		static ConstructorHelpers::FObjectFinder<URobotPartDefinition> CoreFinder(TEXT("/Game/RobotParts/DA_RobotCore.DA_RobotCore"));
+		if (CoreFinder.Succeeded())
+		{
+			DefaultParts.Add(CoreFinder.Object);
+		}
+
+		static ConstructorHelpers::FObjectFinder<URobotPartDefinition> WheelFinder(TEXT("/Game/RobotParts/DA_RobotWheel.DA_RobotWheel"));
+		if (WheelFinder.Succeeded())
+		{
+			DefaultParts.Add(WheelFinder.Object);
+		}
+
+		static ConstructorHelpers::FObjectFinder<URobotPartDefinition> ThrusterFinder(TEXT("/Game/RobotParts/DA_RobotThruster.DA_RobotThruster"));
+		if (ThrusterFinder.Succeeded())
+		{
+			DefaultParts.Add(ThrusterFinder.Object);
+		}
+
+		static ConstructorHelpers::FObjectFinder<URobotPartDefinition> ArmorFinder(TEXT("/Game/RobotParts/DA_RobotArmor.DA_RobotArmor"));
+		if (ArmorFinder.Succeeded())
+		{
+			DefaultParts.Add(ArmorFinder.Object);
+		}
+
+		if (DefaultParts.Num() > 0)
+		{
+			BuilderComponent->SetPartDefinitions(DefaultParts);
 		}
 	}
 
