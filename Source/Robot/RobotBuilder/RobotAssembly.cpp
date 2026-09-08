@@ -138,24 +138,19 @@ UPhysicsConstraintComponent* ARobot::CreateLinkConstraint(ARobotPart* ParentPart
 	const bool bIsWheel = ChildPart->GetCategory() == ERobotPartCategory::Wheel;
 	Joint->SetWorldRotation(bIsWheel ? ChildPart->GetActorRotation() : FRotator::ZeroRotator);
 
-	FConstraintInstance& ConstraintInstance = Joint->ConstraintInstance;
-	ConstraintInstance.bDisableCollision = true;
-	ConstraintInstance.bEnableProjection = true;
-	ConstraintInstance.ProjectionLinearTolerance = 1.0f;
-	ConstraintInstance.ProjectionAngularTolerance = 10.0f;
-
 	Joint->RegisterComponent();
 	Joint->SetConstrainedComponents(ParentPart->GetMeshComponent(), NAME_None, ChildPart->GetMeshComponent(), NAME_None);
+	Joint->SetDisableCollision(true);
 
 	// position is welded for every part
-	Joint->SetLinearXLimit(ELinearConstraintMotion::Locked, 0.0f);
-	Joint->SetLinearYLimit(ELinearConstraintMotion::Locked, 0.0f);
-	Joint->SetLinearZLimit(ELinearConstraintMotion::Locked, 0.0f);
+	Joint->SetLinearXLimit(ELinearConstraintMotion::LCM_Locked, 0.0f);
+	Joint->SetLinearYLimit(ELinearConstraintMotion::LCM_Locked, 0.0f);
+	Joint->SetLinearZLimit(ELinearConstraintMotion::LCM_Locked, 0.0f);
 
 	// wheels keep one free twist axis, everything else is fully locked
-	Joint->SetAngularSwing1Limit(EAngularConstraintMotion::Locked, 0.0f);
-	Joint->SetAngularSwing2Limit(EAngularConstraintMotion::Locked, 0.0f);
-	Joint->SetAngularTwistLimit(bIsWheel ? EAngularConstraintMotion::Free : EAngularConstraintMotion::Locked, 0.0f);
+	Joint->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Locked, 0.0f);
+	Joint->SetAngularSwing2Limit(EAngularConstraintMotion::ACM_Locked, 0.0f);
+	Joint->SetAngularTwistLimit(bIsWheel ? EAngularConstraintMotion::ACM_Free : EAngularConstraintMotion::ACM_Locked, 0.0f);
 
 	return Joint;
 }

@@ -5,15 +5,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "RobotTypes.h"
+#include "RobotPart.h"
 #include "RobotAssembly.generated.h"
 
-class ARobotPart;
 class URobotPartDefinition;
 class UPhysicsConstraintComponent;
 class USceneComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRobotPartAddedSignature, ARobotPart*, Part);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRobotPartDamagedSignature, ARobotPart*, Part, float, NewHP);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRobotPartDetachedSignature, ARobotPart*, Part);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRobotDestroyedSignature, ARobot*, Robot);
 

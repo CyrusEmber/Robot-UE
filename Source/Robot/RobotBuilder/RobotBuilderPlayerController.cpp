@@ -32,7 +32,7 @@ ARobotBuilderPlayerController::ARobotBuilderPlayerController()
 		static ConstructorHelpers::FObjectFinder<UInputMappingContext> DriveContextFinder(TEXT("/Game/Input/IMC_Drive.IMC_Drive"));
 		if (DriveContextFinder.Succeeded())
 		{
-			BuilderComponent->DriveMappingContext = DriveContextFinder.Object;
+			BuilderComponent->SetDriveMappingContext(DriveContextFinder.Object);
 		}
 	}
 
@@ -90,39 +90,41 @@ void ARobotBuilderPlayerController::SetupInputComponent()
 		return;
 	}
 
+	URobotBuilderComponent* Builder = BuilderComponent.Get();
+
 	if (RobotClickAction)
 	{
-		EnhancedInputComponent->BindAction(RobotClickAction, ETriggerEvent::Started, BuilderComponent, &URobotBuilderComponent::HandleClick);
+		EnhancedInputComponent->BindAction(RobotClickAction, ETriggerEvent::Started, Builder, &URobotBuilderComponent::HandleClick);
 	}
 
 	if (RobotAttackAction)
 	{
-		EnhancedInputComponent->BindAction(RobotAttackAction, ETriggerEvent::Started, BuilderComponent, &URobotBuilderComponent::HandleAttack);
+		EnhancedInputComponent->BindAction(RobotAttackAction, ETriggerEvent::Started, Builder, &URobotBuilderComponent::HandleAttack);
 	}
 
 	if (RobotCycleModeAction)
 	{
-		EnhancedInputComponent->BindAction(RobotCycleModeAction, ETriggerEvent::Started, BuilderComponent, &URobotBuilderComponent::CycleMode);
+		EnhancedInputComponent->BindAction(RobotCycleModeAction, ETriggerEvent::Started, Builder, &URobotBuilderComponent::CycleMode);
 	}
 
 	if (RobotRotateYawAction)
 	{
-		EnhancedInputComponent->BindAction(RobotRotateYawAction, ETriggerEvent::Triggered, BuilderComponent, &URobotBuilderComponent::HandleRotateYaw);
+		EnhancedInputComponent->BindAction(RobotRotateYawAction, ETriggerEvent::Triggered, Builder, &URobotBuilderComponent::HandleRotateYaw);
 	}
 
 	if (RobotRotatePitchAction)
 	{
-		EnhancedInputComponent->BindAction(RobotRotatePitchAction, ETriggerEvent::Started, BuilderComponent, &URobotBuilderComponent::HandleRotatePitch);
+		EnhancedInputComponent->BindAction(RobotRotatePitchAction, ETriggerEvent::Started, Builder, &URobotBuilderComponent::HandleRotatePitch);
 	}
 
 	if (RobotDriveMoveAction)
 	{
-		EnhancedInputComponent->BindAction(RobotDriveMoveAction, ETriggerEvent::Triggered, BuilderComponent, &URobotBuilderComponent::HandleDriveMove);
+		EnhancedInputComponent->BindAction(RobotDriveMoveAction, ETriggerEvent::Triggered, Builder, &URobotBuilderComponent::HandleDriveMove);
 	}
 
 	if (RobotThrustAction)
 	{
-		EnhancedInputComponent->BindAction(RobotThrustAction, ETriggerEvent::Started, BuilderComponent, &URobotBuilderComponent::HandleThrustStart);
-		EnhancedInputComponent->BindAction(RobotThrustAction, ETriggerEvent::Completed, BuilderComponent, &URobotBuilderComponent::HandleThrustStop);
+		EnhancedInputComponent->BindAction(RobotThrustAction, ETriggerEvent::Started, Builder, &URobotBuilderComponent::HandleThrustStart);
+		EnhancedInputComponent->BindAction(RobotThrustAction, ETriggerEvent::Completed, Builder, &URobotBuilderComponent::HandleThrustStop);
 	}
 }

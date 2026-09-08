@@ -47,8 +47,6 @@ class URobotBuilderWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	/** Constructor */
-	URobotBuilderWidget();
 
 protected:
 	/** Builds the whole layout once */

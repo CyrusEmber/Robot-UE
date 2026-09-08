@@ -9,8 +9,10 @@
 #include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
+#include "Components/CanvasPanelSlot.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
+#include "Components/VerticalBoxSlot.h"
 #include "GameFramework/PlayerController.h"
 
 void URobotButtonHandler::HandleClicked()
@@ -29,11 +31,6 @@ void URobotButtonHandler::HandleClicked()
 	{
 		BuilderPtr->SetMode(TargetMode);
 	}
-}
-
-URobotBuilderWidget::URobotBuilderWidget()
-{
-	bIsFocusable = false;
 }
 
 URobotBuilderComponent* URobotBuilderWidget::GetBuilder() const
@@ -85,7 +82,7 @@ void URobotBuilderWidget::BuildLayout()
 	// title
 	UTextBlock* TitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("TitleText"));
 	TitleText->SetText(FText::FromString(TEXT("ROBOT BUILDER")));
-	TitleText->SetColorAndOpacity(FSlateColor(FLinearColor::White)));
+	TitleText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
 	ContentBox->AddChildToVerticalBox(TitleText);
 
 	// one button per part definition
@@ -160,7 +157,7 @@ void URobotBuilderWidget::BuildLayout()
 	// status line
 	StatusText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("StatusText"));
 	StatusText->SetText(FText::FromString(TEXT("Mode: Build")));
-	StatusText->SetColorAndOpacity(FSlateColor(FLinearColor::White)));
+	StatusText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
 	if (UVerticalBoxSlot* StatusSlot = ContentBox->AddChildToVerticalBox(StatusText))
 	{
 		StatusSlot->SetPadding(FMargin(0.0f, 6.0f, 0.0f, 0.0f));

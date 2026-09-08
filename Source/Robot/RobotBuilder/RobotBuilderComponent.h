@@ -62,13 +62,13 @@ public:
 	void CycleMode();
 
 	/** Scroll wheel: rotate the pending part around the yaw axis */
-	void HandleRotateYaw(float Delta);
+	void HandleRotateYaw(const struct FInputActionValue& Value);
 
 	/** Key: rotate the pending part around the pitch axis */
 	void HandleRotatePitch();
 
 	/** WASD while in drive mode */
-	void HandleDriveMove(FVector2D AxisValue);
+	void HandleDriveMove(const struct FInputActionValue& Value);
 
 	/** Space pressed while in drive mode */
 	void HandleThrustStart();
@@ -87,6 +87,9 @@ public:
 	void SetMode(ERobotBuilderMode NewMode);
 
 	ARobot* GetDriveTarget() const { return DriveTarget.Get(); }
+
+	/** Sets the drive mapping context used while in drive mode */
+	void SetDriveMappingContext(UInputMappingContext* Context) { DriveMappingContext = Context; }
 
 protected:
 	/** Traces from the player camera. Returns true on blocking hit. */

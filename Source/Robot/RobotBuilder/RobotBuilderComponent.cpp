@@ -11,6 +11,7 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/LocalPlayer.h"
 #include "EnhancedInputSubsystems.h"
+#include "InputActionValue.h"
 #include "InputMappingContext.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerController.h"
@@ -92,7 +93,7 @@ bool URobotBuilderComponent::TraceFromCamera(FHitResult& OutHit) const
 	}
 	if (PreviewMesh)
 	{
-		QueryParams.AddIgnoredComponent(PreviewMesh);
+		QueryParams.AddIgnoredComponent(PreviewMesh.Get());
 	}
 
 	return World->LineTraceSingleByChannel(OutHit, CameraLocation, TraceEnd, ECC_Visibility, QueryParams);
@@ -335,8 +336,10 @@ void URobotBuilderComponent::CycleMode()
 	}
 }
 
-void URobotBuilderComponent::HandleRotateYaw(float Delta)
+void URobotBuilderComponent::HandleRotateYaw(const FInputActionValue& Value)
 {
+	const float Delta = Value.Get<float>();
+
 	if (FMath::Abs(Delta) > KINDA_SMALL_NUMBER)
 	{
 		PendingRotation.Yaw += FMath::Sign(Delta) * RotateYawStep;
@@ -349,8 +352,10 @@ void URobotBuilderComponent::HandleRotatePitch()
 	PendingRotation.Normalize();
 }
 
-void URobotBuilderComponent::HandleDriveMove(FVector2D AxisValue)
+void URobotBuilderComponent::HandleDriveMove(const FInputActionValue& Value)
 {
+	const FVector2D AxisValue = Value.Get<FVector2D>();
+
 	if (ARobot* Target = DriveTarget.Get())
 	{
 		// X = forward/back, Y = turn left/right
