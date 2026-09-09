@@ -64,6 +64,9 @@ public:
 	/** World space center of mass of all parts still connected to the core */
 	FVector GetCenterOfMassWorld() const;
 
+	/** Drive demand vs core supply budget from the last drive update, 0..N (1.0 = exactly at the core budget) */
+	float GetDrivePowerUsage() const { return DrivePowerUsage; }
+
 	/** Drive input: X = forward/back, Y = turn left/right */
 	void SetDriveInput(FVector2D InDriveInput) { DriveInput = InDriveInput; }
 
@@ -140,6 +143,9 @@ protected:
 
 	/** Current thrust input */
 	float ThrustInput = 0.0f;
+
+	/** Drive demand vs core budget from the last ApplyDriveForces, 0..N */
+	float DrivePowerUsage = 0.0f;
 
 	/** True while the robot is being torn apart */
 	bool bDestroying = false;

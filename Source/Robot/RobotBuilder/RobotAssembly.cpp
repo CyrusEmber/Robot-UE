@@ -498,7 +498,47 @@ void ARobot::ApplyDriveForces()
 
 	const FVector CoreRight = CorePart->GetActorRightVector();
 	const FVector RobotCenterOfMass = GetCenterOfMassWorld();
+	const URobotPartDefinition* CoreDefinition = CorePart->GetDefinition();
 
+	// the core supplies a finite drive budget: total torque and thrust demanded
+	// by all parts is capped at the budget, so heavy robots or many wheels just
+	// accelerate slower instead of gaining unlimited power
+	const float TorqueBudget = CoreDefinition ? CoreDefinition->DriveTorqueBudget : 0.0f;
+	const float ThrustBudget = CoreDefinition ? CoreDefinition->ThrustForceBudget : 0.0f;
+
+	// pass 1: sum up the unclamped demand of every wheel and thruster
+	float TorqueDemand = 0.0f;
+	float ThrustDemand = 0.0f;
+
+	for (const TObjectPtr<ARobotPart>& Part : Parts)
+	{
+		const URobotPartDefinition* Definition = Part ? Part->GetDefinition() : nullptr;
+		if (!Definition)
+		{
+			continue;
+		}
+
+		if (Definition->IsWheel() && Definition->WheelTorque > 0.0f)
+		{
+			const float SideSign = FVector::DotProduct(Part->GetActorLocation() - RobotCenterOfMass, CoreRight) >= 0.0f ? 1.0f : -1.0f;
+			const float Drive = DriveInput.X + DriveInput.Y * SideSign;
+			TorqueDemand += Definition->WheelTorque * FMath::Abs(Drive);
+		}
+		else if (Definition->IsThruster() && ThrustInput > 0.0f && Definition->ThrustForce > 0.0f)
+		{
+			ThrustDemand += Definition->ThrustForce * ThrustInput;
+		}
+	}
+
+	DrivePowerUsage = FMath::Max(
+		TorqueDemand / FMath::Max(TorqueBudget, KINDA_SMALL_NUMBER),
+		ThrustDemand / FMath::Max(ThrustBudget, KINDA_SMALL_NUMBER));
+
+	// demand above the budget is scaled down proportionally across all parts
+	const float TorqueScale = TorqueDemand > TorqueBudget ? TorqueBudget / TorqueDemand : 1.0f;
+	const float ThrustScale = ThrustDemand > ThrustBudget ? ThrustBudget / ThrustDemand : 1.0f;
+
+	// pass 2: apply the scaled forces
 	for (const TObjectPtr<ARobotPart>& Part : Parts)
 	{
 		const URobotPartDefinition* Definition = Part ? Part->GetDefinition() : nullptr;
@@ -522,7 +562,7 @@ void ARobot::ApplyDriveForces()
 			{
 				if (FMath::Abs(Spin) < Definition->MaxWheelSpinRate)
 				{
-					Mesh->AddTorqueInRadians(AxleDirection * Definition->WheelTorque * Drive, NAME_None, true);
+					Mesh->AddTorqueInRadians(AxleDirection * Definition->WheelTorque * Drive * TorqueScale, NAME_None, true);
 				}
 			}
 			else if (FMath::Abs(Spin) > 0.05f)
@@ -536,7 +576,7 @@ void ARobot::ApplyDriveForces()
 		else if (Definition->IsThruster() && ThrustInput > 0.0f && Definition->ThrustForce > 0.0f)
 		{
 			const FVector ThrustDirection = Part->GetActorForwardVector();
-			Mesh->AddForceAtLocation(ThrustDirection * Definition->ThrustForce * ThrustInput, Mesh->GetComponentLocation());
+			Mesh->AddForceAtLocation(ThrustDirection * Definition->ThrustForce * ThrustInput * ThrustScale, Mesh->GetComponentLocation());
 		}
 	}
 }

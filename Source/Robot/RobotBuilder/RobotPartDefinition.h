@@ -75,6 +75,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Part|Thruster", meta=(ClampMin=0))
 	float ThrustForce = 80000.0f;
 
+	/** Total wheel torque this core can supply. Demand above the budget is scaled down proportionally, so extra wheels or mass just accelerate slower */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Part|Core", meta=(ClampMin=0))
+	float DriveTorqueBudget = 1000000.0f;
+
+	/** Total thruster force this core can supply. Demand above the budget is scaled down proportionally */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Part|Core", meta=(ClampMin=0))
+	float ThrustForceBudget = 160000.0f;
+
 	bool IsCore() const { return Category == ERobotPartCategory::Core; }
 	bool IsWheel() const { return Category == ERobotPartCategory::Wheel; }
 	bool IsThruster() const { return Category == ERobotPartCategory::Thruster; }

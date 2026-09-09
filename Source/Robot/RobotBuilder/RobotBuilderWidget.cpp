@@ -192,6 +192,10 @@ void URobotBuilderWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaT
 	if (ARobot* DriveTarget = BuilderPtr->GetDriveTarget())
 	{
 		StatusLine += FString::Printf(TEXT(" | Robot: %d parts, %.0f kg"), DriveTarget->GetParts().Num(), DriveTarget->GetTotalMass());
+
+		// >100% means the parts demand more power than the core can supply,
+		// so every wheel and thruster runs proportionally weaker
+		StatusLine += FString::Printf(TEXT(" | Power: %.0f%%"), DriveTarget->GetDrivePowerUsage() * 100.0f);
 	}
 
 	StatusText->SetText(FText::FromString(StatusLine));
