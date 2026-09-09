@@ -91,6 +91,9 @@ public:
 	/** Sets the drive mapping context used while in drive mode */
 	void SetDriveMappingContext(UInputMappingContext* Context) { DriveMappingContext = Context; }
 
+	/** Sets the pawn movement mapping context that is swapped out while driving */
+	void SetPawnMovementContext(UInputMappingContext* Context) { PawnMovementContext = Context; }
+
 	/** Sets the part definitions offered by the build UI */
 	void SetPartDefinitions(const TArray<TObjectPtr<URobotPartDefinition>>& Definitions) { PartDefinitions = Definitions; }
 
@@ -122,7 +125,7 @@ protected:
 	/** Applies attack damage to the traced part */
 	void AttackTracedPart(const FHitResult& Hit);
 
-	/** Adds or removes the drive mapping context so WASD stops moving the pawn while driving */
+	/** Swaps the pawn movement context for the drive context when entering/leaving drive mode */
 	void UpdateDriveMappingContext();
 
 	/** Points drive input at another robot */
@@ -167,9 +170,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Builder|Debug")
 	bool bDrawCenterOfMass = true;
 
-	/** Drive mapping context added with higher priority while in drive mode */
+	/** Drive mapping context added while in drive mode */
 	UPROPERTY(EditAnywhere, Category="Builder|Input")
 	TObjectPtr<UInputMappingContext> DriveMappingContext;
+
+	/** Pawn movement mapping context removed while in drive mode so WASD stops walking */
+	UPROPERTY(EditAnywhere, Category="Builder|Input")
+	TObjectPtr<UInputMappingContext> PawnMovementContext;
 
 private:
 	/** Current interaction mode */

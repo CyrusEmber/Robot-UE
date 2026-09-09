@@ -20,6 +20,14 @@ ARobotBuilderPlayerController::ARobotBuilderPlayerController()
 		DefaultMappingContexts.Add(DefaultContextFinder.Object);
 	}
 
+	// IMC_Default only maps the gamepad sticks; mouse look lives in its own context
+	// (the template player controller blueprint adds both, so mirror that here)
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> MouseLookContextFinder(TEXT("/Game/Input/IMC_MouseLook.IMC_MouseLook"));
+	if (MouseLookContextFinder.Succeeded())
+	{
+		DefaultMappingContexts.Add(MouseLookContextFinder.Object);
+	}
+
 	// auto-wire builder assets when they exist at the documented paths,
 	// so no manual assignment is needed after creating them
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> BuilderContextFinder(TEXT("/Game/Input/IMC_Builder.IMC_Builder"));
@@ -34,6 +42,12 @@ ARobotBuilderPlayerController::ARobotBuilderPlayerController()
 		if (DriveContextFinder.Succeeded())
 		{
 			BuilderComponent->SetDriveMappingContext(DriveContextFinder.Object);
+		}
+
+		// this context (walking/jumping) is swapped out while driving
+		if (DefaultContextFinder.Succeeded())
+		{
+			BuilderComponent->SetPawnMovementContext(DefaultContextFinder.Object);
 		}
 
 		// auto-wire the default part definitions created by the setup script

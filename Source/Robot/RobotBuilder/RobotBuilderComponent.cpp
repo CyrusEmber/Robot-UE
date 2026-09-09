@@ -415,20 +415,39 @@ void URobotBuilderComponent::SetMode(ERobotBuilderMode NewMode)
 void URobotBuilderComponent::UpdateDriveMappingContext()
 {
 	APlayerController* OwnerPC = Cast<APlayerController>(GetOwner());
-	if (!OwnerPC || !OwnerPC->GetLocalPlayer() || !DriveMappingContext)
+	if (!OwnerPC || !OwnerPC->GetLocalPlayer())
 	{
 		return;
 	}
 
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(OwnerPC->GetLocalPlayer()))
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(OwnerPC->GetLocalPlayer());
+	if (!Subsystem)
 	{
-		if (Mode == ERobotBuilderMode::Drive)
+		return;
+	}
+
+	// drive mode is exclusive with normal movement: swap the pawn movement
+	// context for the drive context so WASD controls the robot, not the character
+	if (Mode == ERobotBuilderMode::Drive)
+	{
+		if (PawnMovementContext)
+		{
+			Subsystem->RemoveMappingContext(PawnMovementContext);
+		}
+		if (DriveMappingContext)
 		{
 			Subsystem->AddMappingContext(DriveMappingContext, 1);
 		}
-		else
+	}
+	else
+	{
+		if (DriveMappingContext)
 		{
 			Subsystem->RemoveMappingContext(DriveMappingContext);
+		}
+		if (PawnMovementContext)
+		{
+			Subsystem->AddMappingContext(PawnMovementContext, 0);
 		}
 	}
 }
