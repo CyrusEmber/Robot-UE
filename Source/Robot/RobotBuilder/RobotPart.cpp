@@ -89,8 +89,9 @@ void ARobotPart::ApplyPartDamage(float Amount)
 
 void ARobotPart::MarkAsDebris()
 {
+	// dead parts keep their robot reference so the graph can clean up
+	// their links when the debris is demolished; bDead gates damage reporting
 	bDead = true;
-	OwningRobot = nullptr;
 }
 
 void ARobotPart::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

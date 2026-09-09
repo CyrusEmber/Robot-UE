@@ -300,33 +300,85 @@ void ARobot::RunConnectivityPass()
 		}
 	}
 
-	// detach every part that lost its path to the core
+	// sever only the edges crossing the cut so the detached subtree keeps
+	// its internal constraints and falls off as one coherent chunk
+	TArray<FGuid> BoundaryLinkIds;
+	for (const FRobotLink& Link : Links)
+	{
+		ARobotPart* Parent = Link.Parent.Get();
+		ARobotPart* Child = Link.Child.Get();
+		if (!Parent || !Child)
+		{
+			continue;
+		}
+
+		if (Reached.Contains(Parent) != Reached.Contains(Child))
+		{
+			BoundaryLinkIds.Add(Link.LinkId);
+		}
+	}
+
+	for (const FGuid& LinkId : BoundaryLinkIds)
+	{
+		for (int32 LinkIndex = 0; LinkIndex < Links.Num(); ++LinkIndex)
+		{
+			if (Links[LinkIndex].LinkId != LinkId)
+			{
+				continue;
+			}
+
+			if (UPhysicsConstraintComponent* Constraint = Links[LinkIndex].Constraint.Get())
+			{
+				Constraint->BreakConstraint();
+				Constraint->DestroyComponent();
+			}
+
+			if (ARobotPart* Child = Links[LinkIndex].Child.Get())
+			{
+				Child->SetJoint(nullptr);
+			}
+
+			Links.RemoveAt(LinkIndex);
+			break;
+		}
+	}
+
+	// unregister the detached parts as debris, keeping their remaining links
 	TArray<ARobotPart*> PartsToDetach;
 	for (const TObjectPtr<ARobotPart>& Part : Parts)
 	{
 		if (Part && !Reached.Contains(Part))
 		{
-			PartsToDetach.Add(Part);
+			PartsToDetach.Add(Part.Get());
 		}
 	}
 
 	for (ARobotPart* Part : PartsToDetach)
 	{
-		DetachPart(Part);
+		DetachPart(Part, false);
 	}
 }
 
-void ARobot::DetachPart(ARobotPart* Part)
+void ARobot::DetachPart(ARobotPart* Part, bool bSeverParentLink)
 {
 	if (!Part)
 	{
 		return;
 	}
 
-	// sever the edge to the parent in case it is still registered
-	DestroyLinkForChild(Part);
+	// sever the edge to the parent for single-part detaches;
+	// chunk detaches keep internal links so the subtree stays whole
+	if (bSeverParentLink)
+	{
+		DestroyLinkForChild(Part);
+	}
 
-	Parts.RemoveSingle(Part);
+	// detach only once: later connectivity passes must not re-emit debris
+	if (Parts.RemoveSingle(Part) == 0)
+	{
+		return;
+	}
+
 	Part->MarkAsDebris();
 	OnPartDetached.Broadcast(Part);
 
@@ -338,7 +390,15 @@ void ARobot::DetachPart(ARobotPart* Part)
 		{
 			if (IsValid(Part))
 			{
-				Part->Destroy();
+				if (ARobot* Robot = Part->GetOwningRobot())
+				{
+					// route through the robot so chunk links are severed properly
+					Robot->RemovePart(Part);
+				}
+				else
+				{
+					Part->Destroy();
+				}
 			}
 		});
 		GetWorld()->GetTimerManager().SetTimer(DebrisTimer, DebrisDelegate, DebrisLifetime, false);

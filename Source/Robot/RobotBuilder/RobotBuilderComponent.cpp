@@ -211,7 +211,8 @@ void URobotBuilderComponent::ExecuteModeAction(const FHitResult& Hit)
 	{
 	case ERobotBuilderMode::Build:
 	{
-		if (HitPart && HitPart->GetOwningRobot())
+		// dead debris parts cannot receive attachments
+		if (HitPart && !HitPart->IsDead() && HitPart->GetOwningRobot())
 		{
 			TryAttachPart(Hit, HitPart);
 		}
@@ -228,6 +229,7 @@ void URobotBuilderComponent::ExecuteModeAction(const FHitResult& Hit)
 		{
 			if (ARobot* HitRobot = HitPart->GetOwningRobot())
 			{
+				// works for connected parts and debris chunks alike
 				HitRobot->RemovePart(HitPart);
 			}
 			else
@@ -240,7 +242,8 @@ void URobotBuilderComponent::ExecuteModeAction(const FHitResult& Hit)
 
 	case ERobotBuilderMode::Drive:
 	{
-		SetDriveTarget(HitPart ? HitPart->GetOwningRobot() : nullptr);
+		ARobot* TargetRobot = (HitPart && !HitPart->IsDead()) ? HitPart->GetOwningRobot() : nullptr;
+		SetDriveTarget(TargetRobot);
 		break;
 	}
 	}

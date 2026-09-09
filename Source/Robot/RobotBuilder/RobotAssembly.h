@@ -92,8 +92,12 @@ protected:
 	/** BFS from the core; detaches every part that cannot reach it */
 	void RunConnectivityPass();
 
-	/** Unregisters a part from this robot without destroying it */
-	void DetachPart(ARobotPart* Part);
+	/**
+	 *  Unregisters a part from this robot without destroying it.
+	 *  bSeverParentLink=false keeps its remaining links so detached
+	 *  subtrees fall off as one chunk.
+	 */
+	void DetachPart(ARobotPart* Part, bool bSeverParentLink = true);
 
 	/** Removes and breaks the edge connecting a part to its parent */
 	void DestroyLinkForChild(ARobotPart* ChildPart);
