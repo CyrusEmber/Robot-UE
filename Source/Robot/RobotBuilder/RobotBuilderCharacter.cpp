@@ -2,6 +2,9 @@
 
 #include "RobotBuilderCharacter.h"
 #include "InputAction.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Animation/AnimInstance.h"
 #include "UObject/ConstructorHelpers.h"
 
 ARobotBuilderCharacter::ARobotBuilderCharacter()
@@ -29,5 +32,22 @@ ARobotBuilderCharacter::ARobotBuilderCharacter()
 	if (MouseLookActionFinder.Succeeded())
 	{
 		MouseLookAction = MouseLookActionFinder.Object;
+	}
+
+	// this pawn has no Blueprint parent, so assign the template mannequin directly:
+	// without a mesh the character is invisible and the view reads as first person
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshFinder(TEXT("/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple.SKM_Manny_Simple"));
+	if (MeshFinder.Succeeded())
+	{
+		GetMesh()->SetSkeletalMesh(MeshFinder.Object);
+		GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -96.0f));
+		GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+	}
+
+	// ABP_Manny_Combat only casts to a generic Character, so it works on this pawn
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimClassFinder(TEXT("/Game/Variant_Combat/Anims/ABP_Manny_Combat.ABP_Manny_Combat_C"));
+	if (AnimClassFinder.Succeeded())
+	{
+		GetMesh()->SetAnimInstanceClass(AnimClassFinder.Class);
 	}
 }
